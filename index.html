@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>A Wishing Well</title>
+  <!-- Google Fonts for a modern and fancy look -->
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Cinzel:wght@700&display=swap" rel="stylesheet">
+  <style>
+    /* Reset & Base Styles */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      height: 100%;
+      font-family: 'Montserrat', sans-serif;
+      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+      color: #fff;
+      overflow-x: hidden;
+      scroll-behavior: smooth;
+    }
+    
+    /* Navigation Bar */
+    .nav {
+      position: fixed;
+      top: 0;
+      width: 100%;
+      background: rgba(0,0,0,0.6);
+      padding: 10px 20px;
+      z-index: 100;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .nav h2 { font-size: 1.5em; }
+    .nav ul {
+      list-style: none;
+      display: flex;
+      gap: 15px;
+    }
+    .nav ul li {
+      cursor: pointer;
+      transition: color 0.3s;
+    }
+    .nav ul li:hover { color: #FFEB3B; }
+    
+    /* Donation Button */
+    .donation {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      z-index: 100;
+    }
+    .donation input[type="submit"] {
+      background: #FF6F61;
+      border: none;
+      padding: 8px 15px;
+      color: #fff;
+      font-size: 1em;
+      border-radius: 25px;
+      cursor: pointer;
+      transition: background 0.3s, transform 0.2s;
+    }
+    .donation input[type="submit"]:hover {
+      background: #FF3B2F;
+      transform: scale(1.05);
+    }
+    
+    /* Main Container */
+    .container {
+      margin-top: 60px;
+      padding: 20px;
+      max-width: 900px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    
+    /* Hero Section */
+    .hero {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 40px 20px;
+    }
+    .hero h1 { 
+      font-size: 3em; 
+      margin-bottom: 10px; 
+      text-shadow: 2px 2px 5px rgba(0,0,0,0.5); 
+    }
+    .hero p { 
+      font-size: 1.2em; 
+      margin-bottom: 20px; 
+    }
+    
+    /* Well Section */
+    .well-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: 40px 0;
+      position: relative;
+    }
+    .well-animation-container {
+      position: relative;
+      width: 250px;
+      height: 250px;
+      margin: 20px 0;
+      z-index: 2; /* Well appears above the coin */
+    }
+    /* Display the well image as-is (no borders or circular cropping) */
+    .well-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    /* Glow Animation for the Well */
+    @keyframes glow {
+      0%   { filter: brightness(1); }
+      50%  { filter: brightness(1.8); }
+      100% { filter: brightness(1); }
+    }
+    .well-glow {
+      animation: glow 4s ease-in-out forwards;
+    }
+    
+    /* Coin Element */
+    .coin {
+      position: fixed;
+      top: -50px;
+      left: 50%;
+      width: 40px;
+      height: 40px;
+      background: radial-gradient(circle, #FFEB3B, #FBC02D);
+      border: 2px solid #F57F17;
+      border-radius: 50%;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+      opacity: 0;
+      transform: translateX(-50%);
+      z-index: 1;
+    }
+    @keyframes coinDrop {
+      0% {
+        transform: translateX(-50%) translateY(0);
+        opacity: 1;
+      }
+      80% {
+        transform: translateX(-50%) translateY(60vh);
+        opacity: 1;
+      }
+      100% {
+        transform: translateX(-50%) translateY(60vh);
+        opacity: 0;
+      }
+    }
+    
+    /* Wish Input Section */
+    .wish-section {
+      width: 100%;
+      max-width: 400px;
+      margin: 20px auto;
+    }
+    .wish-section textarea {
+      width: 100%;
+      padding: 10px;
+      font-size: 1.1em;
+      border: 2px solid #ccc;
+      border-radius: 5px;
+      resize: none;
+    }
+    .wish-section button {
+      margin-top: 10px;
+      width: 100%;
+      background: #4CAF50;
+      border: none;
+      padding: 10px;
+      font-size: 1.1em;
+      color: #fff;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background 0.3s, transform 0.2s;
+    }
+    .wish-section button:hover {
+      background: #388E3C;
+      transform: scale(1.05);
+    }
+    
+    /* Pop-up Wish Message */
+    .wish-message {
+      position: absolute;
+      top: -80px;  /* Positioned above the well */
+      left: 50%;
+      transform: translateX(-50%);
+      opacity: 0;
+      white-space: nowrap; /* Ensure text stays in one horizontal line */
+      font-family: 'Cinzel', serif;
+      font-size: 1.8em;
+      font-weight: bold;
+      color: #FFD700;
+      text-shadow: 0 0 15px rgba(255,215,0,0.8);
+      pointer-events: none;
+      z-index: 3;
+    }
+    .wish-message.show {
+      animation: textPop 2s ease-out forwards;
+    }
+    @keyframes textPop {
+      0% {
+        transform: translateX(-50%) scale(0.4);
+        opacity: 0;
+        filter: blur(6px);
+      }
+      50% {
+        transform: translateX(-50%) scale(1.1);
+        opacity: 1;
+        filter: blur(0);
+      }
+      100% {
+        transform: translateX(-50%) scale(1);
+        opacity: 1;
+      }
+    }
+    
+    /* Info Sections */
+    .info-section {
+      background: rgba(0, 0, 0, 0.6);
+      padding: 20px;
+      border-radius: 10px;
+      margin: 20px 0;
+      line-height: 1.6;
+    }
+    .info-section h2 {
+      margin-bottom: 10px;
+      color: #FFEB3B;
+    }
+    .info-section p {
+      font-size: 1em;
+    }
+    
+    /* Footer */
+    .footer {
+      text-align: center;
+      margin: 40px 0 20px;
+      font-size: 0.9em;
+      color: #ccc;
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation Bar -->
+  <nav class="nav">
+    <h2>Wishing Well</h2>
+    <ul>
+      <li onclick="document.getElementById('hero').scrollIntoView({behavior: 'smooth'})">Home</li>
+      <li onclick="document.getElementById('about').scrollIntoView({behavior: 'smooth'})">About</li>
+      <li onclick="document.getElementById('contact').scrollIntoView({behavior: 'smooth'})">Contact</li>
+    </ul>
+  </nav>
+  
+  <!-- Donation Button -->
+  <div class="donation">
+    <form action="https://www.paypal.com/donate" method="post" target="_blank">
+      <input type="hidden" name="business" value="your-personal-paypal@example.com">
+      <input type="hidden" name="item_name" value="Donation for A Wishing Well">
+      <input type="hidden" name="currency_code" value="USD">
+      <input type="submit" value="Donate">
+    </form>
+  </div>
+  
+  <!-- Main Content -->
+  <div class="container">
+    <!-- Hero Section -->
+    <section class="hero" id="hero">
+      <h1>A Wishing Well</h1>
+      <p>Make a wish, drop a coin, and let the magic unfold. Your dreams matter!</p>
+    </section>
+    
+    <!-- Well & Wish Section -->
+    <section class="well-section">
+      <div class="well-animation-container" id="wellContainer">
+        <!-- Local well image displayed as-is -->
+        <img src="well.png" alt="Wishing Well" class="well-image">
+        <!-- Glowing wish message positioned above the well -->
+        <div class="wish-message" id="wishMessage">
+          IF YOU BELIEVE IN IT, IT SHALL COME TURE
+        </div>
+      </div>
+      <div class="wish-section">
+        <textarea id="wishInput" rows="2" placeholder="Type your wish here..."></textarea>
+        <button type="button" id="sendWish">Send</button>
+      </div>
+    </section>
+    
+    <!-- About Section -->
+    <section class="info-section" id="about">
+      <h2>About Our Wishing Well</h2>
+      <p>
+        Our digital wishing well is a sanctuary for dreams and hope. Every coin dropped not only supports our community initiatives but also inspires positivity and change. Join us in making wishes come true, one coin at a time.
+      </p>
+    </section>
+    
+    <!-- How It Works Section -->
+    <section class="info-section">
+      <h2>How It Works</h2>
+      <p>
+        1. Donate via PayPal to support our cause.<br>
+        2. Enter your heartfelt wish in the input field.<br>
+        3. Watch the coin fall from the top of the screen, triggering the well to glow and your wish message to smoothly pop up above the well.<br>
+        4. Feel the magic and believe in the power of hope!
+      </p>
+    </section>
+    
+    <!-- Contact Section -->
+    <section class="info-section" id="contact">
+      <h2>Contact Us</h2>
+      <p>
+        For inquiries, collaborations, or to share your story, email us at: 
+        <a href="mailto:support@awishingwell.com" style="color:#FFEB3B; text-decoration:underline;">support@awishingwell.com</a><br>
+        Follow us on social media for the latest updates and inspiring stories.
+      </p>
+    </section>
+    
+    <!-- Footer -->
+    <footer class="footer">
+      &copy; 2025 A Wishing Well. All rights reserved.
+    </footer>
+  </div>
+  
+  <!-- Coin Element (falls from the top) -->
+  <div class="coin" id="coin"></div>
+  
+  <!-- Audio Element for Magic Chime Sound -->
+  <audio id="magicSound" src="https://www.soundjay.com/magic/sounds/magic-chime-1.mp3"></audio>
+  
+  <script>
+    // Function to handle wish sending, coin drop, well glow, pop-out message, and sound effect
+    function sendWish(event) {
+      if (event) event.preventDefault();
+      const wishInput = document.getElementById('wishInput');
+      const wishText = wishInput.value.trim();
+      console.log('Wish text:', wishText);
+      
+      if (wishText === "") {
+        alert("Please enter your wish before sending.");
+        return;
+      }
+      
+      const coin = document.getElementById('coin');
+      const wellContainer = document.getElementById('wellContainer');
+      const wishMessage = document.getElementById('wishMessage');
+      const magicSound = document.getElementById('magicSound');
+      
+      // Reset coin animation
+      coin.style.animation = 'none';
+      coin.style.opacity = '1';
+      void coin.offsetWidth;
+      coin.style.animation = 'coinDrop 2s forwards';
+      
+      // After coin animation, trigger the well glow and pop-out wish message with sound
+      setTimeout(() => {
+        wellContainer.classList.add('well-glow');
+        wishMessage.classList.add('show');
+        magicSound.play();
+        // Remove glow and message after 4 seconds
+        setTimeout(() => {
+          wellContainer.classList.remove('well-glow');
+          wishMessage.classList.remove('show');
+        }, 4000);
+      }, 2000);
+      
+      // Clear the wish input
+      wishInput.value = "";
+    }
+    
+    document.getElementById('sendWish').addEventListener('click', sendWish);
+  </script>
+</body>
+</html>
