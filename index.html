@@ -23,14 +23,15 @@
       position: fixed;
       top: 0;
       width: 100%;
-      background: rgba(0,0,0,0.6);
+      background: #000; /* Black background for the navbar */
       padding: 10px 20px;
       z-index: 100;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5); /* Adds a shadow for a sleek look */
     }
-    .nav h2 { font-size: 1.5em; }
+    .nav h2 { font-size: 1.5em; color: #FFEB3B; }
     .nav ul {
       list-style: none;
       display: flex;
@@ -39,6 +40,7 @@
     .nav ul li {
       cursor: pointer;
       transition: color 0.3s;
+      color: #fff;
     }
     .nav ul li:hover { color: #FFEB3B; }
     
@@ -66,7 +68,7 @@
     
     /* Main Container */
     .container {
-      margin-top: 60px;
+      margin-top: 80px; /* Adjusted for fixed navbar */
       padding: 20px;
       max-width: 900px;
       margin-left: auto;
@@ -187,39 +189,31 @@
     /* Pop-up Wish Message */
     .wish-message {
       position: absolute;
-      top: -80px;  /* Positioned above the well */
+      top: -80px;
       left: 50%;
       transform: translateX(-50%);
       opacity: 0;
-      white-space: nowrap; /* Ensure text stays in one horizontal line */
+      white-space: nowrap;
       font-family: 'Cinzel', serif;
-      font-size: 1.8em;
+      font-size: calc(1em + 2vw); /* Adjust font size to be more responsive */
       font-weight: bold;
       color: #FFD700;
       text-shadow: 0 0 15px rgba(255,215,0,0.8);
       pointer-events: none;
       z-index: 3;
+      max-width: 100%; /* Ensure the text doesn't exceed screen width */
+      overflow-wrap: break-word; /* Allow breaking of long words */
+      transition: opacity 0.5s ease-in-out;
     }
-    .wish-message.show {
-      animation: textPop 2s ease-out forwards;
-    }
-    @keyframes textPop {
-      0% {
-        transform: translateX(-50%) scale(0.4);
-        opacity: 0;
-        filter: blur(6px);
-      }
-      50% {
-        transform: translateX(-50%) scale(1.1);
-        opacity: 1;
-        filter: blur(0);
-      }
-      100% {
-        transform: translateX(-50%) scale(1);
-        opacity: 1;
+
+    /* Optionally, tweak top position for small screens */
+    @media (max-width: 600px) {
+      .wish-message {
+        font-size: calc(1em + 4vw); /* Increase font size for small screens */
+        top: -60px; /* Adjust the position of the message */
       }
     }
-    
+
     /* Info Sections */
     .info-section {
       background: rgba(0, 0, 0, 0.6);
@@ -281,7 +275,7 @@
         <img src="well.png" alt="Wishing Well" class="well-image">
         <!-- Glowing wish message positioned above the well -->
         <div class="wish-message" id="wishMessage">
-          IF YOU BELIEVE IN IT, IT SHALL COME TURE
+          THOU SHALL BELIEVE <br> THUS, SHALL GRANT
         </div>
       </div>
       <div class="wish-section">
@@ -358,12 +352,12 @@
       // After coin animation, trigger the well glow and pop-out wish message with sound
       setTimeout(() => {
         wellContainer.classList.add('well-glow');
-        wishMessage.classList.add('show');
+        wishMessage.style.opacity = '1'; // Make message visible
         magicSound.play();
         // Remove glow and message after 4 seconds
         setTimeout(() => {
           wellContainer.classList.remove('well-glow');
-          wishMessage.classList.remove('show');
+          wishMessage.style.opacity = '0'; // Hide message after time
         }, 4000);
       }, 2000);
       
